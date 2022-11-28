@@ -96,7 +96,7 @@ public final class AssignmentCompositeControllerTest {
 
 		AssignmentComposite<MyTo> composite = new AssignmentComposite<MyTo>() {
 			@Override
-			public List<IAssignable<MyTo>> getSelectedValuesLeft() {
+			protected List<IAssignable<MyTo>> getSelectedValuesLeft() {
 				return Collections.<IAssignable<MyTo>> singletonList(LEFT_ASSIGNABLE_1);
 			}
 		};
@@ -130,7 +130,7 @@ public final class AssignmentCompositeControllerTest {
 
 		AssignmentComposite<MyTo> composite = new AssignmentComposite<MyTo>() {
 			@Override
-			public List<IAssignable<MyTo>> getSelectedValuesLeft() {
+			protected List<IAssignable<MyTo>> getSelectedValuesLeft() {
 				return TABLE_ROW_VALUES_LEFT;
 			}
 		};
@@ -164,7 +164,7 @@ public final class AssignmentCompositeControllerTest {
 
 		AssignmentComposite<MyTo> composite = new AssignmentComposite<MyTo>() {
 			@Override
-			public List<IAssignable<MyTo>> getSelectedValuesRight() {
+			protected List<IAssignable<MyTo>> getSelectedValuesRight() {
 				return Collections.<IAssignable<MyTo>> singletonList(RIGHT_ASSIGNABLE_1);
 			}
 		};
@@ -198,7 +198,7 @@ public final class AssignmentCompositeControllerTest {
 
 		AssignmentComposite<MyTo> composite = new AssignmentComposite<MyTo>() {
 			@Override
-			public List<IAssignable<MyTo>> getSelectedValuesRight() {
+			protected List<IAssignable<MyTo>> getSelectedValuesRight() {
 				return TABLE_ROW_VALUES_RIGHT;
 			}
 		};

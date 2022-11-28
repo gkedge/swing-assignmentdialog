@@ -77,8 +77,8 @@ public class AssignmentComposite<T> extends JComponent {
 	private static final String ALLWAY_UP = "2uparrow.png";
 
 	private final JPanel contentPanel = new JPanel();
-	private JTable tableLeft;
-	private JTable tableRight;
+	protected JTable tableLeft;
+	protected JTable tableRight;
 	private AssignmentCompositeController<T> compositeController;
 	private JButton buttonRight;
 	private JButton buttonAllRight;
@@ -180,7 +180,7 @@ public class AssignmentComposite<T> extends JComponent {
 				gbc_scrollPane.gridy = 1;
 				panelLeft.add(scrollPane, gbc_scrollPane);
 				{
-					tableLeft = new JTable();
+					tableLeft = getTableLeft();
 					tableLeft.addMouseListener(new MouseAdapter() {
 						@Override
 						public void mouseClicked(MouseEvent e) {
@@ -386,7 +386,7 @@ public class AssignmentComposite<T> extends JComponent {
 				gbc_scrollPane.gridy = 1;
 				panelRight.add(scrollPane, gbc_scrollPane);
 				{
-					tableRight = new JTable();
+					tableRight = getTableRight();
 					tableRight.addMouseListener(new MouseAdapter() {
 						@Override
 						public void mouseClicked(MouseEvent e) {
@@ -419,6 +419,14 @@ public class AssignmentComposite<T> extends JComponent {
 		setLeftRightButtonIconsVisible(true);
 	}
 
+	protected JTable getTableLeft() {
+		return new JTable();
+	}
+
+	protected JTable getTableRight() {
+		return new JTable();
+	}
+
 	private void initListListener() {
 		ListSelectionListener tableSelectionListener = new ListSelectionListener() {
 
@@ -432,7 +440,7 @@ public class AssignmentComposite<T> extends JComponent {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void updateEnablement() {
+	protected void updateEnablement() {
 
 		buttonRight.setEnabled(!getSelectedValuesLeft().isEmpty());
 		buttonLeft.setEnabled(!getSelectedValuesRight().isEmpty());
@@ -597,7 +605,7 @@ public class AssignmentComposite<T> extends JComponent {
 	private void createFilter(JTable dataTable, final JTable filterTable, TableModel filterTableModel) {
 		filterTable.setModel(filterTableModel);
 		filterTable.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
-		filterTable.setRowHeight(filterTable.getRowHeight() + 3);
+		filterTable.setRowHeight(dataTable.getRowHeight() + 3);
 		filterTable.setCellSelectionEnabled(false);
 
 		// Editor which reacts on a single click and has no border
@@ -630,7 +638,7 @@ public class AssignmentComposite<T> extends JComponent {
 	/**
 	 * Advises both tables to refresh their contents.
 	 */
-	void refreshTables() {
+	public void refreshTables() {
 		((AbstractTableModel) tableLeft.getModel()).fireTableDataChanged();
 		((AbstractTableModel) tableRight.getModel()).fireTableDataChanged();
 		updateEnablement();
@@ -639,7 +647,7 @@ public class AssignmentComposite<T> extends JComponent {
 	/**
 	 * @return the selected {@link IAssignable}s in the left table (not the unassigned).
 	 */
-	List<IAssignable<T>> getSelectedValuesLeft() {
+	protected List<IAssignable<T>> getSelectedValuesLeft() {
 		int[] selectedRows = tableLeft.getSelectedRows();
 		return getSelectedItemsFromModel(selectedRows, tableLeft);
 	}
@@ -647,7 +655,7 @@ public class AssignmentComposite<T> extends JComponent {
 	/**
 	 * @return the selected {@link IAssignable}s in the right table (not the assigned).
 	 */
-	List<IAssignable<T>> getSelectedValuesRight() {
+	protected List<IAssignable<T>> getSelectedValuesRight() {
 		int[] selectedRows = tableRight.getSelectedRows();
 		return getSelectedItemsFromModel(selectedRows, tableRight);
 	}
@@ -676,13 +684,23 @@ public class AssignmentComposite<T> extends JComponent {
 	 * @param selectedValues
 	 *            the values to select.
 	 */
-	void selectValuesRight(List<IAssignable<T>> selectedValues) {
+	protected void selectValuesRight(List<IAssignable<T>> selectedValues) {
 		@SuppressWarnings("unchecked")
 		List<IAssignable<T>> assignables = ((AssignmentTableModel<T>) tableRight.getModel()).getAssignables();
 
 		for (IAssignable<T> value : selectedValues) {
 			int indexOf = assignables.indexOf(value);
 			tableRight.changeSelection(indexOf, -1, true, false);
+		}
+	}
+
+	protected void selectValuesLeft(List<IAssignable<T>> selectedValues) {
+		@SuppressWarnings("unchecked")
+		List<IAssignable<T>> assignables = ((AssignmentTableModel<T>) tableLeft.getModel()).getAssignables();
+
+		for (IAssignable<T> value : selectedValues) {
+			int indexOf = assignables.indexOf(value);
+			tableLeft.changeSelection(indexOf, -1, true, false);
 		}
 	}
 

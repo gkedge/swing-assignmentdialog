@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.googlecode.swing-assignmentdialog</groupId>
 	<artifactId>assignmentdialog</artifactId>
-	<version>1.0.1-SNAPSHOT</version>
+	<version>1.0.1</version>
 	<packaging>jar</packaging>
 
 	<name>Swing Assignment Dialog</name>
@@ -75,16 +75,14 @@
 	</dependencies>
 
 	<distributionManagement>
-		<snapshotRepository>
-			<id>sonatype-nexus-snapshots</id>
-			<name>Sonatype Nexus Snapshots</name>
-			<url>http://oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
 		<repository>
-			<id>sonatype-nexus-staging</id>
-			<name>Nexus Release Repository</name>
-			<url>http://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+			<id>metron-maven-server</id>
+			<url>http://maven.metsci.com:7080/metsci-releases</url>
 		</repository>
+		<snapshotRepository>
+			<id>metron-maven-server</id>
+			<url>http://maven.metsci.com:7080/metsci-snapshots</url>
+		</snapshotRepository>
 	</distributionManagement>
 
 	<profiles>
@@ -101,7 +99,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
-						<version>1.4</version>
+						<version>3.0.1</version>
 						<executions>
 							<execution>
 								<id>sign-artifacts</id>

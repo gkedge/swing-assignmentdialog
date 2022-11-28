@@ -61,11 +61,12 @@ public class AssignmentCompositeDemo extends JFrame {
 		setContentPane(contentPane);
 
 		// Create data
-		List<String> tableColumNames = Arrays.asList("Firstname", "Lastname");
+		List<String> tableColumNames = Arrays.asList("Group", "Plot");
 		List<IAssignable<PersonTo>> tableRowValuesLeft = new ArrayList<IAssignable<PersonTo>>();
-		tableRowValuesLeft.add(new PersonToAssignable(new PersonTo("Firstname 1", "Lastname 3")));
-		tableRowValuesLeft.add(new PersonToAssignable(new PersonTo("Firstname 2", "Lastname 2")));
-		tableRowValuesLeft.add(new PersonToAssignable(new PersonTo("Firstname 3", "Lastname 1")));
+		tableRowValuesLeft.add(new PersonToAssignable(new PersonTo("Navigation", "Heading")));
+		tableRowValuesLeft.add(new PersonToAssignable(new PersonTo("Navigation", "Roll")));
+		tableRowValuesLeft.add(new PersonToAssignable(new PersonTo("Navigation", "Pitch")));
+		tableRowValuesLeft.add(new PersonToAssignable(new PersonTo("Navigation", "Yaw")));
 
 		// Create model
 		AssignmentCompositeModel<PersonTo> model = new AssignmentCompositeModel<PersonTo>(tableColumNames, tableRowValuesLeft);
