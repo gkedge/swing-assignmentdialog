@@ -22,7 +22,7 @@ import com.googlecode.assignmentdialog.core.IAssignable;
  * @param <T>
  *            the concrete class used in the assignment dialog.
  */
-public final class AssignmentCompositeController<T> {
+public class AssignmentCompositeController<T> {
 
 	private AssignmentComposite<T> assignmentComposite;
 
@@ -202,14 +202,21 @@ public final class AssignmentCompositeController<T> {
 		List<String> tableColumNames = assignmentCompositeModel.getTableColumNames();
 
 		List<IAssignable<T>> tableRowValuesLeft = assignmentCompositeModel.getTableRowValuesLeft();
-		AssignmentTableModel<T> assignmentTableModelLeft = new AssignmentTableModel<T>(tableColumNames,
-				tableRowValuesLeft);
+		AssignmentTableModel<T> assignmentTableModelLeft = getAssignmentTableModelLeft(tableColumNames, tableRowValuesLeft);
 		assignmentComposite.setTableModelLeft(assignmentTableModelLeft);
 
 		List<IAssignable<T>> tableRowValuesRight = assignmentCompositeModel.getTableRowValuesRight();
-		AssignmentTableModel<T> assignmentTableModelRight = new AssignmentTableModel<T>(tableColumNames,
-				tableRowValuesRight);
+		AssignmentTableModel<T> assignmentTableModelRight = getAssignmentTableModelRight(tableColumNames, tableRowValuesRight);
 		assignmentComposite.setTableModelRight(assignmentTableModelRight);
+	}
+
+	protected AssignmentTableModel<T> getAssignmentTableModelRight(List<String> tableColumNames, List<IAssignable<T>> tableRowValuesRight) {
+		return new AssignmentTableModel<T>(tableColumNames,
+				tableRowValuesRight);
+	}
+
+	protected AssignmentTableModel<T> getAssignmentTableModelLeft(List<String> tableColumNames, List<IAssignable<T>> tableRowValuesLeft) {
+		return new AssignmentTableModel<T>(tableColumNames, tableRowValuesLeft);
 	}
 
 	/**
