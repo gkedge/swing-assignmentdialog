@@ -1,77 +1,72 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.googlecode.swing-assignmentdialog</groupId>
-	<artifactId>assignmentdialog</artifactId>
-	<version>1.0.2</version>
-	<packaging>jar</packaging>
+<!--
+  ~ DISTRIBUTION STATEMENT D. Further dissemination only as directed by (Program Manager,
+  ~ PMS 406) (2022) or higher DoD authority.
+  ~
+  ~ This software was developed by the Department of the Navy, NAVSEA Unmanned and Small
+  ~ Combatants. It is provided under the terms of use found in the LICENSE file at the
+  ~ source code root directory.
+  -->
 
-	<name>Swing Assignment Dialog</name>
-	<description>A generic swing component for moving objects between two JTables</description>
-	<url>https://github.com/kaiwinter/swing-assignmentdialog</url>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.googlecode.swing-assignmentdialog</groupId>
+    <artifactId>assignmentdialog</artifactId>
+    <version>1.0.3</version>
+    <packaging>jar</packaging>
 
-	<licenses>
-		<license>
-			<name>Apache 2</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
+    <name>Swing Assignment Dialog</name>
+    <description>A generic swing component for moving objects between two JTables</description>
 
-	<scm>
-		<url>https://github.com/kaiwinter/swing-assignmentdialog</url>
-		<connection>scm:git:git://github.com/kaiwinter/swing-assignmentdialog.git</connection>
-		<developerConnection>scm:git:git@github.com:kaiwinter/swing-assignmentdialog.git</developerConnection>
-		<tag>HEAD</tag>
-	</scm>
+    <licenses>
+        <license>
+            <name>Apache 2</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
-	<issueManagement>
-		<system>GitHub Issues</system>
-		<url>https://github.com/kaiwinter/swing-assignmentdialog/issues</url>
-	</issueManagement>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <release>11</release>
+                </configuration>
+            </plugin>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.1</version>
-				<configuration>
-					<source>11.0</source>
-					<target>11.0</target>
-				</configuration>
-			</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.2.1</version>
+                <executions>
+                    <execution>
+                        <id>default</id>
+                        <goals>
+                            <goal>perform</goal>
+                        </goals>
+                        <configuration>
+                            <pomFileName>assignmentdialog/pom.xml</pomFileName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-release-plugin</artifactId>
-				<version>2.2.1</version>
-				<executions>
-					<execution>
-						<id>default</id>
-						<goals>
-							<goal>perform</goal>
-						</goals>
-						<configuration>
-							<pomFileName>assignmentdialog/pom.xml</pomFileName>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
-
-	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.13.1</version>
-			<scope>test</scope>
-		</dependency>
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.1</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations-java5</artifactId>
@@ -80,45 +75,45 @@
         </dependency>
     </dependencies>
 
-	<distributionManagement>
-		<repository>
-			<id>metron-maven-server</id>
-			<url>http://maven.metsci.com:7080/metsci-releases</url>
-		</repository>
-		<snapshotRepository>
-			<id>metron-maven-server</id>
-			<url>http://maven.metsci.com:7080/metsci-snapshots</url>
-		</snapshotRepository>
-	</distributionManagement>
+    <distributionManagement>
+        <repository>
+            <id>metron-maven-server</id>
+            <url>http://maven.metsci.com:7080/metsci-releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>metron-maven-server</id>
+            <url>http://maven.metsci.com:7080/metsci-snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
-	<profiles>
-		<profile>
-			<id>release-sign-artifacts</id>
-			<activation>
-				<property>
-					<name>performRelease</name>
-					<value>true</value>
-				</property>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-gpg-plugin</artifactId>
-						<version>3.0.1</version>
-						<executions>
-							<execution>
-								<id>sign-artifacts</id>
-								<phase>verify</phase>
-								<goals>
-									<goal>sign</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
+    <profiles>
+        <profile>
+            <id>release-sign-artifacts</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>3.0.1</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

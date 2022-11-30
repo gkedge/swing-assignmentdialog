@@ -1,10 +1,27 @@
+/*
+ * DISTRIBUTION STATEMENT D. Further dissemination only as directed by (Program Manager,
+ * PMS 406) (2022) or higher DoD authority.
+ *
+ * This software was developed by the Department of the Navy, NAVSEA Unmanned and Small
+ * Combatants. It is provided under the terms of use found in the LICENSE file at the
+ * source code root directory.
+ */
+
 package com.googlecode.assignmentdialog.ui.composite;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import com.googlecode.assignmentdialog.core.AssignmentCompositeModel;
+import com.googlecode.assignmentdialog.core.IAssignable;
+import com.googlecode.assignmentdialog.ui.composite.filter.FilterCellEditor;
+import com.googlecode.assignmentdialog.ui.composite.filter.FilterTableModel;
+import com.googlecode.assignmentdialog.ui.composite.filter.FilterVisible;
+import org.jetbrains.annotations.Nullable;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -16,36 +33,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
-
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
-import javax.swing.RowFilter;
-import javax.swing.RowSorter;
-import javax.swing.SortOrder;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.TitledBorder;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
-
-import com.googlecode.assignmentdialog.core.AssignmentCompositeModel;
-import com.googlecode.assignmentdialog.core.IAssignable;
-import com.googlecode.assignmentdialog.ui.composite.filter.FilterCellEditor;
-import com.googlecode.assignmentdialog.ui.composite.filter.FilterTableModel;
-import com.googlecode.assignmentdialog.ui.composite.filter.FilterVisible;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * The Composite which contains the assignment controls.
@@ -64,6 +51,15 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings("serial")
 public class AssignmentComposite<T> extends JComponent implements AssignmentCompositeIF<T> {
 
+    private static final DefaultTableCellRenderer BORDERLESS_CELL_RENDERER = new DefaultTableCellRenderer() {
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean selected, boolean focused,
+                                                       int row, int column) {
+            super.getTableCellRendererComponent(table, value, selected, focused, row, column);
+            setBorder(BorderFactory.createLineBorder(getBackground(), 1));
+            return this;
+        }
+    };
     private final JPanel contentPanel = new JPanel();
     protected JTable tableLeft;
     protected JTable tableRight;
@@ -86,16 +82,6 @@ public class AssignmentComposite<T> extends JComponent implements AssignmentComp
     private JPanel panelLeftFilter;
     private JTable tableLeftFilter;
     private JPanel panelLeft;
-
-    private static final DefaultTableCellRenderer BORDERLESS_CELL_RENDERER = new DefaultTableCellRenderer() {
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean selected, boolean focused,
-                                                       int row, int column) {
-            super.getTableCellRendererComponent(table, value, selected, focused, row, column);
-            setBorder(BorderFactory.createLineBorder(getBackground(), 1));
-            return this;
-        }
-    };
     private JPanel panelRightFilter;
     private JTable tableRightFilter;
     private FilterVisible visibleFilter;
@@ -424,13 +410,7 @@ public class AssignmentComposite<T> extends JComponent implements AssignmentComp
 
     @Override
     public void initListListener() {
-        ListSelectionListener tableSelectionListener = new ListSelectionListener() {
-
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-                updateEnablement();
-            }
-        };
+        ListSelectionListener tableSelectionListener = e -> updateEnablement();
         tableLeft.getColumnModel().getSelectionModel().addListSelectionListener(tableSelectionListener);
         tableRight.getColumnModel().getSelectionModel().addListSelectionListener(tableSelectionListener);
     }
@@ -464,7 +444,6 @@ public class AssignmentComposite<T> extends JComponent implements AssignmentComp
         buttonUp.setEnabled(!selectedRight);
         buttonDown.setEnabled(!selectedRight);
         buttonAllDown.setEnabled(!selectedRight);
-
     }
 
     /**
@@ -607,7 +586,7 @@ public class AssignmentComposite<T> extends JComponent implements AssignmentComp
     public void createFilter(JTable dataTable, final JTable filterTable, TableModel filterTableModel) {
         filterTable.setModel(filterTableModel);
         filterTable.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
-        filterTable.setRowHeight(dataTable.getRowHeight() + 3);
+        filterTable.setRowHeight(filterTable.getRowHeight() + 3);
         filterTable.setCellSelectionEnabled(false);
 
         // Editor which reacts on a single click and has no border
@@ -655,7 +634,7 @@ public class AssignmentComposite<T> extends JComponent implements AssignmentComp
     public List<IAssignable<T>> getSelectedValuesLeft() {
         int[] selectedRows = tableLeft.getSelectedRows();
         TableModel tableModel = tableLeft.getModel();
-        if (! (tableModel instanceof AssignmentTableModel)) {
+        if (!(tableModel instanceof AssignmentTableModel)) {
             return List.of();
         }
         return getSelectedItemsFromModel(selectedRows, (AssignmentTableModel<T>) tableModel);
@@ -669,7 +648,7 @@ public class AssignmentComposite<T> extends JComponent implements AssignmentComp
     public List<IAssignable<T>> getSelectedValuesRight() {
         int[] selectedRows = tableRight.getSelectedRows();
         TableModel tableModel = tableRight.getModel();
-        if (! (tableModel instanceof AssignmentTableModel)) {
+        if (!(tableModel instanceof AssignmentTableModel)) {
             return List.of();
         }
         return getSelectedItemsFromModel(selectedRows, (AssignmentTableModel<T>) tableModel);
@@ -837,7 +816,8 @@ public class AssignmentComposite<T> extends JComponent implements AssignmentComp
     /**
      * Sets if the left/right buttons should display the default icons.
      *
-     * @param leftRightButtonIconsVisible if true the left/right buttons will display the default buttons. If false, alternative a text should
+     * @param leftRightButtonIconsVisible if true the left/right buttons will display the default buttons. If false,
+     *                                    alternative a text should
      *                                    be set for each button.
      * @see #setButtonTextToLeft(String)
      * @see #setButtonTextToRight(String)

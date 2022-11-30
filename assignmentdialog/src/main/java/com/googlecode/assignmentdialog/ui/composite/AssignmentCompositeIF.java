@@ -1,3 +1,12 @@
+/*
+ * DISTRIBUTION STATEMENT D. Further dissemination only as directed by (Program Manager,
+ * PMS 406) (2022) or higher DoD authority.
+ *
+ * This software was developed by the Department of the Navy, NAVSEA Unmanned and Small
+ * Combatants. It is provided under the terms of use found in the LICENSE file at the
+ * source code root directory.
+ */
+
 package com.googlecode.assignmentdialog.ui.composite;
 
 import com.googlecode.assignmentdialog.core.IAssignable;
@@ -28,9 +37,7 @@ public interface AssignmentCompositeIF<T> {
         return null;
     }
 
-    default void initListListener() {
-
-    }
+    void initListListener();
 
     void updateEnablement();
 
@@ -125,8 +132,6 @@ public interface AssignmentCompositeIF<T> {
     List<IAssignable<T>> getVisibleTableRowValuesLeft();
 
     List<IAssignable<T>> getVisibleTableRowValuesRight();
-
-//    List<IAssignable<T>> getVisibleTableRowValues(JTable table);
 
     List<IAssignable<T>> getVisibleTableRowValues(AssignmentTableModel<T> tableModel, TableRowSorter<?> rowSorter);
 }

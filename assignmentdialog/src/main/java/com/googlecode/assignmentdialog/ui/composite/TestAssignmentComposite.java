@@ -1,3 +1,12 @@
+/*
+ * DISTRIBUTION STATEMENT D. Further dissemination only as directed by (Program Manager,
+ * PMS 406) (2022) or higher DoD authority.
+ *
+ * This software was developed by the Department of the Navy, NAVSEA Unmanned and Small
+ * Combatants. It is provided under the terms of use found in the LICENSE file at the
+ * source code root directory.
+ */
+
 package com.googlecode.assignmentdialog.ui.composite;
 
 import com.googlecode.assignmentdialog.core.IAssignable;
@@ -6,125 +15,41 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
-import javax.swing.table.*;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableRowSorter;
 import java.awt.event.ActionEvent;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 public class TestAssignmentComposite<T> implements AssignmentCompositeIF<T> {
 
-    private AssignmentCompositeController<T> compositeController;
-
-    private Action arrowActionLeft = new AbstractAction() {
-        {
-            putValue(NAME, "Left Arrow");
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-
-        }
-    };
-
-    private Action arrowActionRight = new AbstractAction() {
-        {
-            putValue(NAME, "Right Arrow");
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-
-        }
-    };
-
-    private Action arrowAllActionLeft = new AbstractAction() {
-        {
-            putValue(NAME, "Left All Arrow");
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-
-        }
-    };
-
-    private Action allArrowActionRight = new AbstractAction() {
-        {
-            putValue(NAME, "Right All Arrow");
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-
-        }
-    };
-
-    private Action allUpArrowAction = new AbstractAction() {
-        {
-            putValue(NAME, "All Up Arrow");
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-
-        }
-    };
-
-    private Action allDownArrowAction = new AbstractAction() {
-        {
-            putValue(NAME, "All Down Arrow");
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-
-        }
-    };
-
-    private Action upArrowAction = new AbstractAction() {
-        {
-            putValue(NAME, "Up Arrow");
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-
-        }
-    };
-
-    private Action downArrowAction = new AbstractAction() {
-        {
-            putValue(NAME, "Down Arrow");
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-
-        }
-    };
-
-    private AssignmentTableModel<T> tableModelLeft;
-
-    private AssignmentTableModel<T> tableModelRight;
-
-    private TableRowSorter<AssignmentTableModel<T>> rowSorterLeft;
-    private TableRowSorter<AssignmentTableModel<T>> rowSorterRight;
-
     private final ListSelectionModel tableRowSelectionModelLeft = new DefaultListSelectionModel();
     private final ListSelectionModel tableRowSelectionModelRight = new DefaultListSelectionModel();
-
     private final TitledBorder titledBorderLeft = new TitledBorder(null, "Available",
             TitledBorder.LEADING, TitledBorder.TOP, null, null);
     private final TitledBorder titledBoarderRight = new TitledBorder(null, "Selected",
             TitledBorder.LEADING, TitledBorder.TOP, null, null);
-
+    private final Map<ButtonAction, Action> buttonActionToActionMap;
+    private AssignmentCompositeController<T> compositeController;
+    private AssignmentTableModel<T> tableModelLeft;
+    private AssignmentTableModel<T> tableModelRight;
+    private TableRowSorter<AssignmentTableModel<T>> rowSorterLeft;
+    private TableRowSorter<AssignmentTableModel<T>> rowSorterRight;
     private boolean tableLeftSortable;
     private boolean tableRightSortable;
     private Integer sortColumnIndex = null;
     private SortOrder sortColumnOrder;
+
+    {
+        buttonActionToActionMap = EnumSet.allOf(ButtonAction.class).stream()
+                .map(buttonAction -> new AbstractMap.SimpleEntry<ButtonAction, Action>(
+                        buttonAction, new DummyAction(buttonAction)))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                        (a, b) -> a, () -> new EnumMap<>(ButtonAction.class)));
+    }
 
     /**
      * Create the dialog.
@@ -136,43 +61,54 @@ public class TestAssignmentComposite<T> implements AssignmentCompositeIF<T> {
         setLeftRightButtonIconsVisible(true);
     }
 
+    @Override
+    public void initListListener() {
+        ListSelectionListener tableSelectionListener = e -> updateEnablement();
+        addLeftTableRowSelectionListener(tableSelectionListener);
+        addRightTableRowSelectionListener(tableSelectionListener);
+    }
+
+    public void addLeftTableRowSelectionListener(ListSelectionListener leftTableRowSelectionListener) {
+        tableRowSelectionModelLeft.addListSelectionListener(leftTableRowSelectionListener);
+    }
+
+    public void addRightTableRowSelectionListener(ListSelectionListener rightTableRowSelectionListener) {
+        tableRowSelectionModelRight.addListSelectionListener(rightTableRowSelectionListener);
+    }
+
     private static @Nullable ImageIcon getIcon(String oneDown) {
         URL resource = AssignmentComposite.class.getResource(oneDown);
         return resource != null ? new ImageIcon(resource) : null;
     }
 
-    public void clear() {
-        tableRowSelectionModelLeft.clearSelection();
-        tableRowSelectionModelRight.clearSelection();
-    }
-
     @Override
     public void updateEnablement() {
 
-        arrowActionRight.setEnabled(!getSelectedValuesLeft().isEmpty());
-        arrowActionLeft.setEnabled(!getSelectedValuesRight().isEmpty());
+        buttonActionToActionMap.get(ButtonAction.RIGHT_ARROW).setEnabled(!getSelectedValuesLeft().isEmpty());
+        buttonActionToActionMap.get(ButtonAction.LEFT_ARROW).setEnabled(!getSelectedValuesRight().isEmpty());
 
+        Action leftAllArrowAction = buttonActionToActionMap.get(ButtonAction.LEFT_ALL_ARROW);
         if (tableModelLeft != null) {
             List<IAssignable<T>> assignablesLeft = tableModelLeft.getAssignables();
-            allArrowActionRight.setEnabled(!assignablesLeft.isEmpty());
+            leftAllArrowAction.setEnabled(!assignablesLeft.isEmpty());
         } else {
-            allArrowActionRight.setEnabled(false);
+            leftAllArrowAction.setEnabled(false);
         }
 
+        Action rightAllArrowAction = buttonActionToActionMap.get(ButtonAction.RIGHT_ALL_ARROW);
         if (tableModelRight != null) {
             List<IAssignable<T>> assignablesRight = tableModelRight.getAssignables();
-            arrowAllActionLeft.setEnabled(!assignablesRight.isEmpty());
+            rightAllArrowAction.setEnabled(!assignablesRight.isEmpty());
         } else {
-            arrowAllActionLeft.setEnabled(false);
+            rightAllArrowAction.setEnabled(false);
         }
 
         // reorder buttons
         boolean selectedRight = getSelectedValuesRight().isEmpty();
-        allUpArrowAction.setEnabled(!selectedRight);
-        upArrowAction.setEnabled(!selectedRight);
-        downArrowAction.setEnabled(!selectedRight);
-        allDownArrowAction.setEnabled(!selectedRight);
-
+        buttonActionToActionMap.get(ButtonAction.UP_ALL_ARROW).setEnabled(!selectedRight);
+        buttonActionToActionMap.get(ButtonAction.UP_ARROW).setEnabled(!selectedRight);
+        buttonActionToActionMap.get(ButtonAction.DOWN_ARROW).setEnabled(!selectedRight);
+        buttonActionToActionMap.get(ButtonAction.DOWN_ALL_ARROW).setEnabled(!selectedRight);
     }
 
     /**
@@ -220,7 +156,7 @@ public class TestAssignmentComposite<T> implements AssignmentCompositeIF<T> {
             rowSorterRight.setSortKeys(Collections.singletonList(new RowSorter.SortKey(sortColumnIndex, sortColumnOrder)));
         }
     }
-    
+
     /**
      * Advises both tables to refresh their contents.
      */
@@ -236,7 +172,7 @@ public class TestAssignmentComposite<T> implements AssignmentCompositeIF<T> {
      */
     @Override
     public List<IAssignable<T>> getSelectedValuesLeft() {
-        int[] selectedRows = new JTable().getSelectedRows();
+        int[] selectedRows = tableRowSelectionModelLeft.getSelectedIndices();
         return getSelectedItemsFromModel(selectedRows, tableModelLeft);
     }
 
@@ -286,7 +222,7 @@ public class TestAssignmentComposite<T> implements AssignmentCompositeIF<T> {
 
         for (IAssignable<T> value : selectedValues) {
             int rowIndex = assignables.indexOf(value);
-            tableRowSelectionModelRight.setSelectionInterval(rowIndex, -1);
+            tableRowSelectionModelLeft.setSelectionInterval(rowIndex, rowIndex);
         }
     }
 
@@ -315,7 +251,7 @@ public class TestAssignmentComposite<T> implements AssignmentCompositeIF<T> {
      */
     @Override
     public void setButtonTextToLeft(String text) {
-        arrowActionLeft.putValue(Action.NAME, text);
+        buttonActionToActionMap.get(ButtonAction.LEFT_ARROW).putValue(Action.NAME, text);
     }
 
     /**
@@ -323,7 +259,7 @@ public class TestAssignmentComposite<T> implements AssignmentCompositeIF<T> {
      */
     @Override
     public void setButtonTextToRight(String text) {
-        arrowActionRight.putValue(Action.NAME, text);
+        buttonActionToActionMap.get(ButtonAction.RIGHT_ARROW).putValue(Action.NAME, text);
     }
 
     /**
@@ -331,7 +267,7 @@ public class TestAssignmentComposite<T> implements AssignmentCompositeIF<T> {
      */
     @Override
     public void setButtonTextAllToLeft(String text) {
-        arrowAllActionLeft.putValue(Action.NAME, text);
+        buttonActionToActionMap.get(ButtonAction.LEFT_ALL_ARROW).putValue(Action.NAME, text);
     }
 
     /**
@@ -339,13 +275,14 @@ public class TestAssignmentComposite<T> implements AssignmentCompositeIF<T> {
      */
     @Override
     public void setButtonTextAllToRight(String text) {
-        allArrowActionRight.putValue(Action.NAME, text);
+        buttonActionToActionMap.get(ButtonAction.RIGHT_ALL_ARROW).putValue(Action.NAME, text);
     }
 
     /**
      * Sets if the left/right buttons should display the default icons.
      *
-     * @param leftRightButtonIconsVisible if true the left/right buttons will display the default buttons. If false, alternative a text should
+     * @param leftRightButtonIconsVisible if true the left/right buttons will display the default buttons. If false,
+     *                                    alternative a text should
      *                                    be set for each button.
      * @see #setButtonTextToLeft(String)
      * @see #setButtonTextToRight(String)
@@ -354,16 +291,20 @@ public class TestAssignmentComposite<T> implements AssignmentCompositeIF<T> {
      */
     @Override
     public void setLeftRightButtonIconsVisible(boolean leftRightButtonIconsVisible) {
+        Action leftAllArrowAction = buttonActionToActionMap.get(ButtonAction.LEFT_ALL_ARROW);
+        Action leftArrowAction = buttonActionToActionMap.get(ButtonAction.LEFT_ARROW);
+        Action rightAllArrowAction = buttonActionToActionMap.get(ButtonAction.RIGHT_ALL_ARROW);
+        Action rightArrowAction = buttonActionToActionMap.get(ButtonAction.RIGHT_ARROW);
         if (leftRightButtonIconsVisible) {
-            arrowAllActionLeft.putValue(Action.LARGE_ICON_KEY, getIcon(AssignmentCompositeIF.ALL_RIGHT));
-            arrowActionLeft.putValue(Action.LARGE_ICON_KEY, getIcon(AssignmentCompositeIF.ONE_RIGHT));
-            arrowActionRight.putValue(Action.LARGE_ICON_KEY, getIcon(AssignmentCompositeIF.ONE_LEFT));
-            allArrowActionRight.putValue(Action.LARGE_ICON_KEY, getIcon(AssignmentCompositeIF.ALL_LEFT));
+            leftAllArrowAction.putValue(Action.LARGE_ICON_KEY, getIcon(AssignmentCompositeIF.ALL_LEFT));
+            leftArrowAction.putValue(Action.LARGE_ICON_KEY, getIcon(AssignmentCompositeIF.ONE_RIGHT));
+            rightAllArrowAction.putValue(Action.LARGE_ICON_KEY, getIcon(AssignmentCompositeIF.ALL_RIGHT));
+            rightArrowAction.putValue(Action.LARGE_ICON_KEY, getIcon(AssignmentCompositeIF.ONE_LEFT));
         } else {
-            arrowActionLeft.putValue(Action.LARGE_ICON_KEY, null);
-            arrowActionRight.putValue(Action.LARGE_ICON_KEY, null);
-            arrowAllActionLeft.putValue(Action.LARGE_ICON_KEY, null);
-            allArrowActionRight.putValue(Action.LARGE_ICON_KEY, null);
+            leftAllArrowAction.putValue(Action.LARGE_ICON_KEY, null);
+            leftArrowAction.putValue(Action.LARGE_ICON_KEY, null);
+            rightAllArrowAction.putValue(Action.LARGE_ICON_KEY, null);
+            rightArrowAction.putValue(Action.LARGE_ICON_KEY, null);
         }
     }
 
@@ -438,7 +379,7 @@ public class TestAssignmentComposite<T> implements AssignmentCompositeIF<T> {
     }
 
     /**
-     * @return only the visible rows (in regards to the filter) of the left table.
+     * @return only the visible rows (regarding the filter) of the left table.
      */
     @Override
     public List<IAssignable<T>> getVisibleTableRowValuesLeft() {
@@ -446,7 +387,7 @@ public class TestAssignmentComposite<T> implements AssignmentCompositeIF<T> {
     }
 
     /**
-     * @return only the visible rows (in regards to the filter) of the right table.
+     * @return only the visible rows (regarding the filter) of the right table.
      */
     @Override
     public List<IAssignable<T>> getVisibleTableRowValuesRight() {
@@ -476,5 +417,85 @@ public class TestAssignmentComposite<T> implements AssignmentCompositeIF<T> {
         }
 
         return visibleAssignables;
+    }
+
+    public void setButtonAction(Action action) {
+        buttonActionToActionMap.put((ButtonAction) action.getValue(TestButtonAction.BUTTON_ACTION), action);
+    }
+
+    public void clear() {
+        tableRowSelectionModelLeft.clearSelection();
+        tableRowSelectionModelRight.clearSelection();
+    }
+
+    public enum ButtonAction {
+        DOWN_ARROW,
+        DOWN_ALL_ARROW,
+        LEFT_ARROW,
+        LEFT_ALL_ARROW,
+        RIGHT_ARROW,
+        RIGHT_ALL_ARROW,
+        UP_ARROW,
+        UP_ALL_ARROW;
+
+        @Override
+        public String toString() {
+            return snakeToCapitalizedWords(name());
+        }
+
+        public static String snakeToCapitalizedWords(String snake) {
+            return snakeToCapitalizedWords(null, null, snake);
+        }
+
+        public static String snakeToCapitalizedWords(@Nullable String prefix, @Nullable String suffix,
+                                                     String snake) {
+            if (snake.isBlank()) {
+                return "";
+            }
+            StringBuilder sb = new StringBuilder();
+            if (prefix != null && !prefix.isBlank()) {
+                prefix = prefix.trim();
+                sb.append(prefix).append(" ");
+            }
+            String[] words = snake.split("_");
+            String separator = "";
+            for (String word : words) {
+                sb.append(separator);
+                sb.append(word.substring(0, 1).toUpperCase()).append(word.substring(1).toLowerCase());
+                separator = " ";
+            }
+            if (suffix != null && !suffix.isBlank()) {
+                suffix = suffix.trim();
+                sb.append(" ").append(suffix);
+            }
+            return sb.toString();
+        }
+
+    }
+
+    public static abstract class TestButtonAction extends AbstractAction {
+        public static final String BUTTON_ACTION = "button-action";
+
+        public TestButtonAction(ButtonAction buttonAction) {
+            putValue(NAME, buttonAction.toString());
+            putValue(ACTION_COMMAND_KEY, buttonAction.name());
+            putValue(BUTTON_ACTION, buttonAction);
+            setEnabled(false);
+        }
+
+        public void click() {
+            actionPerformed(new ActionEvent(this, 0, (String) getValue(ACTION_COMMAND_KEY)));
+        }
+    }
+
+    private static class DummyAction extends TestButtonAction {
+        public DummyAction(ButtonAction buttonAction) {
+            super(buttonAction);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            throw new AssertionError("Unexpected button action!");
+        }
     }
 }
