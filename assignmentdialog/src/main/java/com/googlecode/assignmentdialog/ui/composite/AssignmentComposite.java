@@ -26,8 +26,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -393,8 +391,8 @@ public class AssignmentComposite<T> extends JComponent implements AssignmentComp
         setLeftRightButtonIconsVisible(true);
     }
 
-    private static @Nullable ImageIcon getIcon(String oneDown) {
-        URL resource = AssignmentComposite.class.getResource(oneDown);
+    private static @Nullable ImageIcon getIcon(String resourceName) {
+        URL resource = AssignmentComposite.class.getResource(resourceName);
         return resource != null ? new ImageIcon(resource) : null;
     }
 
@@ -597,20 +595,15 @@ public class AssignmentComposite<T> extends JComponent implements AssignmentComp
         Enumeration<TableColumn> columns = dataTable.getColumnModel().getColumns();
         while (columns.hasMoreElements()) {
             TableColumn column = columns.nextElement();
-            column.addPropertyChangeListener(new PropertyChangeListener() {
+            column.addPropertyChangeListener(evt -> {
+                if ("width".equals(evt.getPropertyName())) {
+                    TableColumn tableColumn = ((TableColumn) evt.getSource());
+                    int modelIndex = tableColumn.getModelIndex();
+                    int newWidth = (Integer) evt.getNewValue();
 
-                @Override
-                public void propertyChange(PropertyChangeEvent evt) {
-                    if ("width".equals(evt.getPropertyName())) {
-                        TableColumn tableColumn = ((TableColumn) evt.getSource());
-                        int modelIndex = tableColumn.getModelIndex();
-                        int newWidth = (Integer) evt.getNewValue();
-
-                        TableColumnModel filterColumnModel = filterTable.getColumnModel();
-                        TableColumn filterColumn = filterColumnModel.getColumn(modelIndex);
-                        filterColumn.setPreferredWidth(newWidth);
-                    }
-
+                    TableColumnModel filterColumnModel = filterTable.getColumnModel();
+                    TableColumn filterColumn = filterColumnModel.getColumn(modelIndex);
+                    filterColumn.setPreferredWidth(newWidth);
                 }
             });
         }
