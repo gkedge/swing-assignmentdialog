@@ -76,6 +76,7 @@ public final class AssignmentTableModel<T> extends AbstractTableModel {
     public void setAssignables(List<IAssignable<T>> assignables) {
         this.assignables.clear();
         this.assignables.addAll(assignables);
+        fireTableDataChanged();
     }
 
 }
