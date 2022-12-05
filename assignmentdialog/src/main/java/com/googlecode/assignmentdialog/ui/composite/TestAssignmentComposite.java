@@ -32,7 +32,10 @@ public class TestAssignmentComposite<T> implements AssignmentCompositeIF<T> {
             TitledBorder.LEADING, TitledBorder.TOP, null, null);
     private final TitledBorder titledBoarderRight = new TitledBorder(null, "Selected",
             TitledBorder.LEADING, TitledBorder.TOP, null, null);
-    private final Map<ButtonAction, Action> buttonActionToActionMap;
+    private final EnumMap<ButtonAction, TestButtonAction> buttonActionToActionMap;
+
+    private final List<ButtonAction> buttonActionCommands = new LinkedList<>();
+
     private AssignmentCompositeController<T> compositeController;
     private AssignmentTableModel<T> tableModelLeft;
     private AssignmentTableModel<T> tableModelRight;
@@ -45,20 +48,27 @@ public class TestAssignmentComposite<T> implements AssignmentCompositeIF<T> {
 
     {
         buttonActionToActionMap = EnumSet.allOf(ButtonAction.class).stream()
-                .map(buttonAction -> new AbstractMap.SimpleEntry<ButtonAction, Action>(
-                        buttonAction, new DummyAction(buttonAction)))
+                .map(buttonAction -> new AbstractMap.SimpleEntry<>(buttonAction, new TestButtonAction(buttonAction)))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                         (a, b) -> a, () -> new EnumMap<>(ButtonAction.class)));
-    }
-
-    /**
-     * Create the dialog.
-     */
-    public TestAssignmentComposite() {
 
         initListListener();
 
         setLeftRightButtonIconsVisible(true);
+
+        EnumSet.allOf(ButtonAction.class).forEach(buttonAction -> buttonActionToActionMap.get(buttonAction).engagePropertyChangeListening());
+    }
+
+    public void click(ButtonAction buttonAction) {
+        buttonActionToActionMap.get(buttonAction).click();
+    }
+
+    public Map<String, Object> getPropertyChanges(ButtonAction buttonAction) {
+        return buttonActionToActionMap.get(buttonAction).getPropertyChanges();
+    }
+
+    public TestButtonAction getAction(ButtonAction buttonAction) {
+        return buttonActionToActionMap.get(buttonAction);
     }
 
     @Override
@@ -419,13 +429,15 @@ public class TestAssignmentComposite<T> implements AssignmentCompositeIF<T> {
         return visibleAssignables;
     }
 
-    public void setButtonAction(Action action) {
-        buttonActionToActionMap.put((ButtonAction) action.getValue(TestButtonAction.BUTTON_ACTION), action);
-    }
 
     public void clear() {
         tableRowSelectionModelLeft.clearSelection();
         tableRowSelectionModelRight.clearSelection();
+        buttonActionToActionMap.values().forEach(TestButtonAction::clear);
+    }
+
+    public List<ButtonAction> getActionCommands() {
+        return buttonActionCommands;
     }
 
     public enum ButtonAction {
@@ -436,7 +448,9 @@ public class TestAssignmentComposite<T> implements AssignmentCompositeIF<T> {
         RIGHT_ARROW,
         RIGHT_ALL_ARROW,
         UP_ARROW,
-        UP_ALL_ARROW;
+        UP_ALL_ARROW,
+
+        UNKNOWN;
 
         @Override
         public String toString() {
@@ -471,10 +485,19 @@ public class TestAssignmentComposite<T> implements AssignmentCompositeIF<T> {
             return sb.toString();
         }
 
+        public static ButtonAction find(String name) {
+            for (ButtonAction buttonAction : EnumSet.allOf(ButtonAction.class)) {
+                if (buttonAction.name().equals(name)) {
+                    return buttonAction;
+                }
+            }
+            return UNKNOWN;
+        }
     }
 
-    public static abstract class TestButtonAction extends AbstractAction {
+    public class TestButtonAction extends AbstractAction {
         public static final String BUTTON_ACTION = "button-action";
+        private final Map<String, Object> propertyChanges = new LinkedHashMap<>();
 
         public TestButtonAction(ButtonAction buttonAction) {
             putValue(NAME, buttonAction.toString());
@@ -483,19 +506,33 @@ public class TestAssignmentComposite<T> implements AssignmentCompositeIF<T> {
             setEnabled(false);
         }
 
-        public void click() {
-            actionPerformed(new ActionEvent(this, 0, (String) getValue(ACTION_COMMAND_KEY)));
-        }
-    }
-
-    private static class DummyAction extends TestButtonAction {
-        public DummyAction(ButtonAction buttonAction) {
-            super(buttonAction);
+        public void engagePropertyChangeListening() {
+            addPropertyChangeListener(evt -> propertyChanges.put(evt.getPropertyName(), evt.getNewValue()));
         }
 
         @Override
-        public void actionPerformed(ActionEvent e) {
-            throw new AssertionError("Unexpected button action!");
+        public void actionPerformed(ActionEvent ae) {
+            Action action = (Action) ae.getSource();
+            ButtonAction buttonAction = (ButtonAction) action.getValue(BUTTON_ACTION);
+            buttonActionCommands.add(buttonAction);
+            switch (buttonAction) {
+                case RIGHT_ARROW:
+                    compositeController.moveRight();
+                    break;
+                default:
+            }
+        }
+
+        public void click() {
+            actionPerformed(new ActionEvent(this, 0, (String) getValue(ACTION_COMMAND_KEY)));
+        }
+
+        public Map<String, Object> getPropertyChanges() {
+            return Map.copyOf(propertyChanges);
+        }
+
+        public void clear() {
+            propertyChanges.clear();
         }
     }
 }
