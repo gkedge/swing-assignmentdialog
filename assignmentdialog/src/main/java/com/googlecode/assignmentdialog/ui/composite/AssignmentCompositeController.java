@@ -84,9 +84,8 @@ public class AssignmentCompositeController<T> {
         List<IAssignable<T>> valuesLeft = assignmentCompositeModel.getTableRowValuesLeft();
         List<IAssignable<T>> valuesRight = assignmentCompositeModel.getTableRowValuesRight();
 
-        valuesRight.addAll(selectedValuesLeft);
         valuesLeft.removeAll(selectedValuesLeft);
-
+        valuesRight.addAll(selectedValuesLeft);
         assignmentComposite.refreshTables();
     }
 
@@ -116,7 +115,7 @@ public class AssignmentCompositeController<T> {
 
         List<IAssignable<T>> valuesRight = assignmentCompositeModel.getTableRowValuesRight();
         valuesRight.removeAll(selectedValuesRight);
-        List<IAssignable<T>> tmpList = new ArrayList<IAssignable<T>>(valuesRight);
+        List<IAssignable<T>> tmpList = new ArrayList<>(valuesRight);
         valuesRight.clear();
         valuesRight.addAll(selectedValuesRight);
         valuesRight.addAll(tmpList);

@@ -9,6 +9,7 @@
 
 package com.googlecode.assignmentdialog.ui.composite;
 
+import com.googlecode.assignmentdialog.core.AbstractAssignable;
 import com.googlecode.assignmentdialog.core.AssignmentCompositeModel;
 import com.googlecode.assignmentdialog.core.IAssignable;
 import com.googlecode.assignmentdialog.ui.composite.filter.FilterCellEditor;
@@ -616,6 +617,17 @@ public class AssignmentComposite<T> extends JComponent implements AssignmentComp
     public void refreshTables() {
         ((AbstractTableModel) tableLeft.getModel()).fireTableDataChanged();
         ((AbstractTableModel) tableRight.getModel()).fireTableDataChanged();
+        updateEnablement();
+    }
+
+    public void refreshTables(AbstractAssignable<T> reselectData) {
+        ((AbstractTableModel) tableLeft.getModel()).fireTableDataChanged();
+        ((AbstractTableModel) tableRight.getModel()).fireTableDataChanged();
+        if (reselectData != null) {
+            List<IAssignable<T>> selectedValues = List.of(reselectData);
+            selectValuesRight(selectedValues);
+            selectValuesLeft(selectedValues);
+        }
         updateEnablement();
     }
 

@@ -9,6 +9,7 @@
 
 package com.googlecode.assignmentdialog.ui.composite;
 
+import com.googlecode.assignmentdialog.core.AbstractAssignable;
 import com.googlecode.assignmentdialog.core.IAssignable;
 import com.googlecode.assignmentdialog.ui.composite.filter.FilterVisible;
 
@@ -68,6 +69,8 @@ public interface AssignmentCompositeIF<T> {
     }
 
     void refreshTables();
+
+    void refreshTables(AbstractAssignable<T> reselectData);
 
     List<IAssignable<T>> getSelectedValuesLeft();
 

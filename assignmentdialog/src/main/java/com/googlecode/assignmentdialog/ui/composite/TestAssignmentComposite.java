@@ -9,6 +9,7 @@
 
 package com.googlecode.assignmentdialog.ui.composite;
 
+import com.googlecode.assignmentdialog.core.AbstractAssignable;
 import com.googlecode.assignmentdialog.core.IAssignable;
 import com.googlecode.assignmentdialog.ui.composite.filter.FilterVisible;
 import org.jetbrains.annotations.Nullable;
@@ -57,6 +58,7 @@ public class TestAssignmentComposite<T> implements AssignmentCompositeIF<T> {
         setLeftRightButtonIconsVisible(true);
 
         EnumSet.allOf(ButtonAction.class).forEach(buttonAction -> buttonActionToActionMap.get(buttonAction).engagePropertyChangeListening());
+
     }
 
     public void click(ButtonAction buttonAction) {
@@ -173,7 +175,25 @@ public class TestAssignmentComposite<T> implements AssignmentCompositeIF<T> {
     @Override
     public void refreshTables() {
         tableModelLeft.fireTableDataChanged();
+        if (tableModelLeft.getRowCount() == 0) {
+            tableRowSelectionModelLeft.clearSelection();
+        }
         tableModelRight.fireTableDataChanged();
+        if (tableModelRight.getRowCount() == 0) {
+            tableRowSelectionModelRight.clearSelection();
+        }
+        updateEnablement();
+    }
+
+    @Override
+    public void refreshTables(AbstractAssignable<T> reselectData) {
+        tableModelLeft.fireTableDataChanged();
+        tableModelRight.fireTableDataChanged();
+        if (reselectData != null) {
+            List<IAssignable<T>> selectedValues = List.of(reselectData);
+            selectValuesRight(selectedValues);
+            selectValuesLeft(selectedValues);
+        }
         updateEnablement();
     }
 
@@ -222,7 +242,7 @@ public class TestAssignmentComposite<T> implements AssignmentCompositeIF<T> {
 
         for (IAssignable<T> value : selectedValues) {
             int rowIndex = assignables.indexOf(value);
-            tableRowSelectionModelRight.setSelectionInterval(rowIndex, -1);
+            tableRowSelectionModelRight.setSelectionInterval(rowIndex, rowIndex);
         }
     }
 
