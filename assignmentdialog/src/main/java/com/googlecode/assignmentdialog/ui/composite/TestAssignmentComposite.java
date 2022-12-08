@@ -174,14 +174,14 @@ public class TestAssignmentComposite<T> implements AssignmentCompositeIF<T> {
      */
     @Override
     public void refreshTables() {
-        tableModelLeft.fireTableDataChanged();
         if (tableModelLeft.getRowCount() == 0) {
             tableRowSelectionModelLeft.clearSelection();
         }
-        tableModelRight.fireTableDataChanged();
         if (tableModelRight.getRowCount() == 0) {
             tableRowSelectionModelRight.clearSelection();
         }
+        tableModelLeft.fireTableDataChanged();
+        tableModelRight.fireTableDataChanged();
         updateEnablement();
     }
 
@@ -449,7 +449,6 @@ public class TestAssignmentComposite<T> implements AssignmentCompositeIF<T> {
         return visibleAssignables;
     }
 
-
     public void clear() {
         tableRowSelectionModelLeft.clearSelection();
         tableRowSelectionModelRight.clearSelection();
@@ -538,6 +537,9 @@ public class TestAssignmentComposite<T> implements AssignmentCompositeIF<T> {
             switch (buttonAction) {
                 case RIGHT_ARROW:
                     compositeController.moveRight();
+                    break;
+                case LEFT_ARROW:
+                    compositeController.moveLeft();
                     break;
                 default:
             }
